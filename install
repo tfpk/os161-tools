@@ -1,0 +1,55 @@
+#!/bin/bash -eu
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+source $DIR/conf
+
+
+if ! command -v os161-gcc; then
+  wget -P /tmp/ http://www.cse.unsw.edu.au/~cs3231/os161-files/os161-utils_2.0.8-2.deb
+  sudo dpkg -i /tmp/os161-utils_2.0.8-2.deb
+fi
+echo "Add /usr/local/bin to your path permanently!!!"
+export PATH="${PATH}:/usr/local/bin"
+
+sudo apt-get install build-essential python
+
+
+mkdir -p $BASEDIR
+
+cd $BASEDIR
+
+if [ ! -d "$ASGMT_DIR" ]; then
+  echo "Please enter your zid (in zXXXXXXX form)"
+  read zid
+
+  git clone gitlab@gitlab.cse.unsw.EDU.AU:$zid/19t1-comp3231-asst0.git "$ASGMT_DIR" 
+fi
+
+cd $ASGMT_DIR
+
+if [ ! -f "$ASGMT_DIR/defs.mk" ]; then
+  ./configure
+fi
+
+bmake 
+bmake install
+
+cd kern/conf
+./config ASST0
+
+cd ../compile/ASST0
+
+bmake depend
+bmake
+bmake install
+
+if [ ! -f "$VMROOT_DIR/sys161.conf" ]; then
+  wget -O - http://cgi.cse.unsw.edu.au/~cs3231/19T1/assignments/asst0/sys161-asst0.conf > "$VMROOT_DIR/sys161.conf"
+fi
+if [ ! -f "$VMROOT_DIR/.gdbinit" ]; then
+  cat $DIR/helpers/os161_gdbinit | sed "s#|ASGMT_DIR|#$ASGMT_DIR#g" > $VMROOT_DIR/.gdbinit
+fi
+
+echo "SOME THINGS LEFT FOR YOU TO DO:"
+echo "Set your \$PATH to include: /usr/local/bin"
+echo "Run \`cat \$THIS_DIRECTORY/helpers/sys_gdbinit >> ~/.gdbinit\`"
