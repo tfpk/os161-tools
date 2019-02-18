@@ -7,9 +7,15 @@ $DIR/compile
 
 cd $VMROOT_DIR
 
+if ! command -v tmux; then
+  echo "Can't find tmux: can't run both at once"
+  exit 1
+fi
+
 if [ "$1" = "-v" ]; then
   tmux split-window "sys161 -w kernel"
 else
   tmux split-window -h "sys161 -w kernel"
 fi
+
 os161-gdb kernel -ex="connect"
