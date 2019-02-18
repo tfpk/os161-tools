@@ -1,5 +1,7 @@
 #!/bin/bash
 
 BASEDIR="$HOME/code/UNSW/3891/"
-ASGMT_DIR="${BASEDIR}/asst0-src"
+ASGMT_NAME="asst0-src"
+ASGMT_DIR="${BASEDIR}/$ASGMT_NAME"
 VMROOT_DIR="${BASEDIR}/root"
+BUNDLE_DIR="${BASEDIR}/bundles"
