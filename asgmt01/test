@@ -1,0 +1,33 @@
+#!/bin/bash
+# `run`: compile and run the os161 environment.
+
+# NOTE: By default this command requires tmux to be running.
+# If you want to disable this, change $T_SET to false below.
+
+# Arguments:
+# -d : run the gdb debugger (requires tmux, and T_SET to be true)
+# -v : split tmux vertically (requires tmux, and T_SET)
+# -t : flip tmux usage (tmux is on by default)
+
+D_SET=false
+V_SET=false
+T_SET=true
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )/.."
+source $DIR/conf
+
+$DIR/compile
+
+if [ "$?" != "0" ]; then
+  echo "Stopping: Compile Failed"
+  exit 1
+fi
+
+cd $VMROOT_DIR
+
+seed=${1:2}
+
+sed "s/seed=1/seed=$seed/" sys161.conf > /tmp/sys161.conf
+sys161 -c /tmp/sys161.conf kernel "1a;1b;1c;1d;q"
+
+
