@@ -1,7 +1,22 @@
 #!/bin/bash
+# Create a bundle for submission.
+function evil_git_dirty {
+  [[ $(git diff --shortstat 2> /dev/null | tail -n1) != "" ]] && echo "*"
+}
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source $DIR/conf
 
 cd $ASGMT_DIR
-git bundle create "$BUNDLE_DIR/${ASGMT_NAME}.bundle" --all
+if [[ "$(evil_git_dirty)" == "*" ]]; then
+  echo "You have a dirty branch!"
+  echo "Don't forget to commit, or files won't be included in the bundle."
+  if [ "$1" == "-f" ]; then
+    echo "Forcing Bundling."
+  else
+    echo "=== Stopping Program. Use -f to override this ==="
+    exit 1
+  fi
+fi
+
+git bundle create "$BUNDLE_DIR/${ASGMT_NUM}.bundle" --all

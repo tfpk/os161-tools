@@ -1,7 +1,10 @@
 #!/bin/bash
+# Configuration variables for this suite.
 
+ASGMT_NUM="asst1"
 BASEDIR="$HOME/code/UNSW/3891/"
-ASGMT_NAME="asst1-src"
+
+ASGMT_NAME="$ASGMT_NUM-src"
 ASGMT_DIR="${BASEDIR}/$ASGMT_NAME"
 VMROOT_DIR="${BASEDIR}/root"
 BUNDLE_DIR="${BASEDIR}/bundles"
