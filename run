@@ -1,21 +1,83 @@
 #!/bin/bash
+# `run`: compile and run the os161 environment.
+
+# NOTE: By default this command requires tmux to be running.
+# If you want to disable this, change $T_SET to false below.
+
+# Arguments:
+# -d : run the gdb debugger (requires tmux, and T_SET to be true)
+# -v : split tmux vertically (requires tmux, and T_SET)
+# -t : flip tmux usage (tmux is on by default)
+
+D_SET=false
+V_SET=false
+T_SET=true
+
+while getopts 'dvt' OPTION; do
+  case "$OPTION" in
+    d)
+      D_SET=true
+      ;;
+
+    v)
+      V_SET=true
+      ;;
+    t)
+      if $T_SET; then
+        T_SET=false
+      else
+        T_SET=true
+      fi
+      ;;
+    ?)
+      echo "script usage: $(basename $0) [-d] [-v] [-t]" >&2
+      exit 1
+      ;;
+  esac
+done
+
+if $D_SET && ! $T_SET; then
+  echo "cannot use -d and not use tmux!" >&2
+  exit 2
+fi
+if $V_SET && ! $T_SET; then
+  echo "cannot use -v and not use tmux!" >&2
+  exit 3
+fi
+if $T_SET && [ -z "$TMUX" ]; then
+  echo "cannot find a TMUX instance, but tmux is being used" >&2
+  exit 4
+fi
+
+shift "$(($OPTIND -1))"
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source $DIR/conf
 
 $DIR/compile
-
-cd $VMROOT_DIR
-
-if ! command -v tmux; then
-  echo "Can't find tmux: can't run both at once"
+if [ "$?" != "0" ]; then
+  echo "Stopping: Compile Failed"
   exit 1
 fi
 
-if [ "$1" = "-v" ]; then
-  tmux split-window "sys161 -w kernel"
-else
-  tmux split-window -h "sys161 -w kernel"
+cd $VMROOT_DIR
+
+if ! $T_SET; then
+  sys161 kernel
+  exit 0
 fi
 
-os161-gdb kernel -ex="connect"
+if $D_SET; then
+  W="-w"
+fi
+
+if $V_SET; then
+  tmux split-window "sys161 $W kernel"
+else
+  tmux split-window -h "sys161 $W kernel"
+fi
+
+if $D_SET; then
+  W="-w"
+  os161-gdb kernel -q -ex="connect" -ex="c"
+fi
