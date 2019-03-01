@@ -25,9 +25,10 @@ fi
 
 cd $VMROOT_DIR
 
-seed=${1:2}
+seed=${1}
+echo "seed is " $seed
 
-sed "s/seed=1/seed=$seed/" sys161.conf > /tmp/sys161.conf
+sed "s/seed=1/seed=$seed/" < sys161.conf > /tmp/sys161.conf
 sys161 -c /tmp/sys161.conf kernel "1a;1b;1c;1d;q"
 
 
